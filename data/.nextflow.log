@@ -1,8 +1,0 @@
-Nov-06 20:33:19.614 [main] DEBUG nextflow.cli.Launcher - $> nextflow run workflow.nf
-Nov-06 20:33:19.677 [main] INFO  nextflow.cli.CmdRun - N E X T F L O W  ~  version 22.04.5
-Nov-06 20:33:19.978 [main] DEBUG nextflow.cli.Launcher - Operation aborted
-nextflow.exception.AbortOperationException: Cannot find script file: workflow.nf
-	at nextflow.cli.CmdRun.getScriptFile(CmdRun.groovy:419)
-	at nextflow.cli.CmdRun.run(CmdRun.groovy:287)
-	at nextflow.cli.Launcher.run(Launcher.groovy:480)
-	at nextflow.cli.Launcher.main(Launcher.groovy:639)
