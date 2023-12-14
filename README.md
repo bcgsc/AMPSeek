@@ -99,7 +99,9 @@ nextflow workflow.nf --download true --download_from <url>
 
 **Note**: If you have your data, you can manually put the data into `AMPSeek/data` folder, but you need to delete the example input (`AMPSeek/data/AMPlify_AMP_test_common.fa`).
 
+
 ## Rerun:
+
 Before reruns please do the following: 
 
 1. Make sure there is only 1 file (a FASTA file) in the directory `AMPSeek/data`.
