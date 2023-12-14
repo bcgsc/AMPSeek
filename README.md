@@ -28,6 +28,8 @@ This pipeline is comprised of 4 major and 2 minor steps:
 5. RUNTAMPER: This step runs `tAMPer` on the input `.fa` and zipped structure files. It saves the toxicity report at the end of its prediction.
 6. COMPILERESULTS: This step compiles the results from steps 2, 3, and 5 into a `.html` file.  
 
+![Pipeline](example_output/pipeline.png)
+
 ### Main Images/Environments:
 
 1. AMPlify: "quay.io/biocontainers/amplify:1.1.0--hdfd78af_0" docker image has been used. This contains AMPlify v1.1.0 and its dependencies.
