@@ -94,6 +94,11 @@ If the previous not work, please try:
 ```
 sudo dockerd
 ```
+Next, you need to open 2 new folders in order to run:
+```
+mkdir output
+mkdir output/foldings
+```
 
 Now, you are ready to run the pipeline (with default inputs):
 ```
