@@ -42,14 +42,14 @@ One other option for users is to manually store the **FASTA** file that want to 
 
 The pipeline can check different peptide sequences in different lengths and predict their activity, 3D structure, charge, and toxicity.
 
-## Intermediate Result Files and Folders:
+### Intermediate Result Files and Folders:
 As a result of prediction and zip stages, pipeline generates different intermediate files. The intermediate generated prediction files for activity, 3D structure, and toxicity are stored in `AMPSeek/output` folder. In this folder:
 
 1. `foldings` folder: This folder contains the output of peptide structure prediction. The pipeline only interact with the `.pbd` files which contain the molecular coordinate information directly. 
 2. `*.tsv` file: This is the report of the run for `ÀMPlify`. It contains the data pipeline uses this file for the final report's AMP activity data representation.
 3. `foldings/*.csv` file: This file contains the `tAMPer`'s report for the toxicity. The pipeline interacts with this file to generate the final report's AMP activity data representation.
 
-## Output File:
+### Output File:
 The ultimate output file of the pipeline is the `report.html` file. This report can be found on the root directory after the run. The file contains these information:
 
 1. Information About the Run: Which file is run to generate this document
@@ -57,12 +57,6 @@ The ultimate output file of the pipeline is the `report.html` file. This report 
 3. AMP Activity Information About the Run Peptide Sequence: AMP activity and confidence score, sub model property scores for AMPlify plot (it uses ensamble learning), attention distribution along the sequence that led the AMPlify model to this outcome plot.  
 4. Protein Structure About the Run Peptide Sequence: Interactable 3D representation of the protein sequence
 5. Toxicity Information About the Run Peptide Sequence: Toxicity score and prediction.
-
-## Result: 
-Example output can be found in the folder `AMPSeek/example_output` under the name `example_report.html`. As mentioned earlier, example output can be found in the folder `AMPSeek/data` under the name `AMPlify_AMP_test_common.fa`. This is an AMP so the results are no surprise. It should look like this:
-
-![First Part](example_output/first.png)
-![Second Part](example_output/second.png)
 
 ### Installation and Default Run
 First, clone this repository to your local:
@@ -113,7 +107,11 @@ mkdir output
 mkdir output/foldings
 ```
 
+## Result: 
+Example output can be found in the folder `AMPSeek/example_output` under the name `example_report.html`. As mentioned earlier, example output can be found in the folder `AMPSeek/data` under the name `AMPlify_AMP_test_common.fa`. This is an AMP so the results are no surprise. It should look like this:
 
+![First Part](example_output/first.png)
+![Second Part](example_output/second.png)
 
 
 ## References
