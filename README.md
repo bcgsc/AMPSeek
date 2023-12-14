@@ -126,7 +126,7 @@ mkdir output/foldings
 ```
 
 ## Result: 
-Example output can be found in the folder `AMPSeek/example_output` under the name `example_report.html`. As mentioned earlier, example output can be found in the folder `AMPSeek/data` under the name `AMPlify_AMP_test_common.fa`. This is an AMP so the results are no surprise. It should look like this:
+Example output can be found in the folder `AMPSeek/example_output` under the name `example_report.html`. As mentioned earlier, example input can be found in the folder `AMPSeek/data` under the name `AMPlify_AMP_test_common.fa`. This is an AMP so the results are no surprise. It should look like this:
 
 ![First Part](example_output/first.png)
 ![Second Part](example_output/second.png)
