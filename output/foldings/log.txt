@@ -1,0 +1,29 @@
+2023-12-14 10:35:32,605 Running colabfold 1.5.0 (755afd98199137c9e0a15440d67fe8d07295e691)
+2023-12-14 10:35:32,692 WARNING: no GPU detected, will be using CPU
+2023-12-14 10:35:33,342 generated new fontManager
+2023-12-14 10:35:36,086 Found 4 citations for tools or databases
+2023-12-14 10:35:36,086 Query 1/1: teAMP0001 (length 28)
+2023-12-14 10:35:37,361 Padding length to 28
+2023-12-14 10:35:37,361 Setting max_seq=176, max_extra_seq=1
+2023-12-14 10:36:23,554 alphafold2_ptm_model_1_seed_000 recycle=0 pLDDT=86.3 pTM=0.417
+2023-12-14 10:36:36,330 alphafold2_ptm_model_1_seed_000 recycle=1 pLDDT=87.1 pTM=0.439
+2023-12-14 10:36:36,337 alphafold2_ptm_model_1_seed_000 took 46.0s (1 recycles)
+2023-12-14 10:36:49,594 alphafold2_ptm_model_2_seed_000 recycle=0 pLDDT=88.6 pTM=0.459
+2023-12-14 10:37:02,398 alphafold2_ptm_model_2_seed_000 recycle=1 pLDDT=92.2 pTM=0.494
+2023-12-14 10:37:02,399 alphafold2_ptm_model_2_seed_000 took 24.7s (1 recycles)
+2023-12-14 10:37:18,320 alphafold2_ptm_model_3_seed_000 recycle=0 pLDDT=86.7 pTM=0.435
+2023-12-14 10:37:31,153 alphafold2_ptm_model_3_seed_000 recycle=1 pLDDT=92.7 pTM=0.495
+2023-12-14 10:37:31,155 alphafold2_ptm_model_3_seed_000 took 27.4s (1 recycles)
+2023-12-14 10:37:45,033 alphafold2_ptm_model_4_seed_000 recycle=0 pLDDT=89.3 pTM=0.447
+2023-12-14 10:37:57,260 alphafold2_ptm_model_4_seed_000 recycle=1 pLDDT=91.6 pTM=0.476
+2023-12-14 10:37:57,261 alphafold2_ptm_model_4_seed_000 took 24.8s (1 recycles)
+2023-12-14 10:38:13,324 alphafold2_ptm_model_5_seed_000 recycle=0 pLDDT=90.7 pTM=0.47
+2023-12-14 10:38:27,614 alphafold2_ptm_model_5_seed_000 recycle=1 pLDDT=90 pTM=0.459
+2023-12-14 10:38:27,616 alphafold2_ptm_model_5_seed_000 took 28.8s (1 recycles)
+2023-12-14 10:38:27,622 reranking models by 'plddt' metric
+2023-12-14 10:38:27,622 rank_001_alphafold2_ptm_model_3_seed_000 pLDDT=92.7 pTM=0.495
+2023-12-14 10:38:27,623 rank_002_alphafold2_ptm_model_2_seed_000 pLDDT=92.2 pTM=0.494
+2023-12-14 10:38:27,623 rank_003_alphafold2_ptm_model_4_seed_000 pLDDT=91.6 pTM=0.476
+2023-12-14 10:38:27,623 rank_004_alphafold2_ptm_model_5_seed_000 pLDDT=90 pTM=0.459
+2023-12-14 10:38:27,623 rank_005_alphafold2_ptm_model_1_seed_000 pLDDT=87.1 pTM=0.439
+2023-12-14 10:38:31,344 Done
