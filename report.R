@@ -22,8 +22,8 @@ library(stringr)
 args = commandArgs(trailingOnly=TRUE)
 amplify_path <- args[1]
 pdb_dir_path <- args[2]
-#tamper_path <- args[3]
 output_path <- args[3]
+tamper_path <- args[4]
 
 #'
 #' ---
@@ -39,9 +39,12 @@ output_path <- args[3]
 #' # AMPSeek Report
 #' The report has been generated from the files:
 {{amplify_path}}
+#' and 
+{{tamper_path}}
 
 #+echo=FALSE
 amplify_results<-read_tsv(amplify_path,show_col_types = FALSE)
+tamper_results <- read_csv(tamper_path,show_col_types = FALSE)
 num_of_amps <- nrow(amplify_results)
 show_protein <- function(protein) {
   return(div(protein))
@@ -52,11 +55,18 @@ show_protein <- function(protein) {
 
 #+echo=FALSE, results="asis", include=TRUE
 amplify_row <- amplify_results[1,]
-
+tamper_row <- tamper_results[1,]
 cat('\n### ID:\n ', toString(amplify_row["Sequence_ID"]), '\n')
 cat('\n### Sequence:\n ', toString(amplify_row["Sequence"]), '\n')
 cat('\n### Properties:\n ', "Length:", toString(amplify_row["Length"]), ", Charge: ", toString(amplify_row["Charge"]), '\n')
 cat('\n### AMP activity:\n ', toString(amplify_row["Prediction"]), ' with overall probability of',toString( amplify_row["Probability_score"] ), '\n')
+if (tamper_row["prediction"] == 1.0) {
+  cat('\n### Toxicity:\n ', "Toxic", ' with overall probability of',toString( tamper_row["score"] ), '\n')
+}
+if (tamper_row["prediction"] != 1.0){
+  cat('\n### Toxicity:\n ', "Not toxic", ' with overall probability of',toString( tamper_row["score"] ), '\n')
+}
+  
 cat('\n### Sub-model probability scores:\n')
 model_probs <- amplify_row%>%select(c(5,6,7,8,9))
 
@@ -66,7 +76,7 @@ pivoted <- model_probs %>%
 print(ggplot(pivoted, aes(x=name, y=value)) +
         geom_bar(stat="identity") +
         scale_x_discrete(guide = guide_axis(angle = 90)) +
-        geom_text(aes(label = value), vjust = 1.5, colour = "white") )
+        geom_text(aes(label = value), vjust = 1.5, colour = "white"))
 
 cat('\n\n### Attention Distribution along the sequence:\n')
 attention <- amplify_row["Attention"]
@@ -75,7 +85,8 @@ attention[1] <- str_sub(attention[1], 2, str_length(attention[1]))
 attention[-1] <- str_sub(attention[-1], 1, str_length(attention[-1])-1)
 attention <- as.numeric(attention)
 seq <- unlist(str_split(toString(amplify_row["Sequence"]), ""))
-num<- 1:str_length(toString(amplify_row["Sequence"]))
+num<-1:str_length(toString(amplify_row["Sequence"]))
+print(str_length(toString(amplify_row["Sequence"])))
 attention_df <- data.frame(number=num, attention_score=attention, amino_acid=seq)
 print(ggplot(attention_df, aes(x=number, y=attention_score)) +
         geom_bar(stat="identity", aes(fill=amino_acid)) +
@@ -84,15 +95,10 @@ print(ggplot(attention_df, aes(x=number, y=attention_score)) +
         ylab("Attention Score")+
         guides(fill=guide_legend(title="Amino Acid Type")))
 
-
 pdb_pattern <- paste(amplify_row["Sequence_ID"],"*rank_001_*.pdb", sep="")
 pdb_file <- file.find(path=pdb_dir_path, pattern=pdb_pattern, up=0, down=0)[1]
-
 cat('\n\n### Best Protein Structure Prediction:\n')
 NGLVieweR(pdb_file)%>%addRepresentation("cartoon")
-
-
-
 
 #+ eval=FALSE, echo=FALSE
 rmarkdown::render('report.R',output_file=output_path)

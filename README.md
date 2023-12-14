@@ -126,6 +126,8 @@ Example output can be found in the folder `AMPSeek/example_output` under the nam
 ![First Part](example_output/first.png)
 ![Second Part](example_output/second.png)
 
+This proves that the pipeline can identify AMP properties of the given peptide sequence. 
+
 
 ## References
 [1] World Health Organization. (2023, November 21). Antimicrobial Resistance. https://www.who.int/news-room/fact-sheets/detail/antimicrobial-resistance

@@ -98,20 +98,23 @@ process COMPILERESULTS{
 
     script:
     """
-    Rscript $rscript_path $amplify $colabfold/foldings $output_path/report.html
+    Rscript $rscript_path $amplify $colabfold/foldings $output_path/report.html $tamper
     """
 }
 
 workflow{
     wait=PREP()
-    input_data_ch = Channel.fromPath("$params.data_path/*.fa")
+    input_data_ch = Channel.fromPath("$params.data_path/*.{fa, fna, fasta}")
     output_data_ch = Channel.fromPath("$params.output_path")
     zipper_ch = Channel.fromPath("$projectDir/zipper.py")
     rscript_path = Channel.fromPath("$projectDir/report.R")
+
     output_amplify = RUNAMPLIFY(input_data_ch, output_data_ch, wait)
     output_colabfold = RUNCOLABFOLD(input_data_ch, output_data_ch, wait)
+
     zip_ch = ZIPFOLDS(zipper_ch, output_colabfold)
     output_tamper = RUNTAMPER(input_data_ch, zip_ch)
     final_path = Channel.fromPath("$projectDir")
+
     COMPILERESULTS(output_amplify, output_colabfold, output_tamper, rscript_path, final_path)
 }
