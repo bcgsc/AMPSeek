@@ -8,20 +8,16 @@ process PREP {
     publishDir "output"
 
     output:
-    path "output"    
+    path ""    
 
     script:
     if (params.download == true)
         """
         rm $params.data_path/*.fa
         wget -O downloaded_input.fa -P $params.data_path $params.download_from
-        mkdir output
-        mkdir output/foldings
         """
     else
         """
-        mkdir output
-        mkdir output/foldings
         """
 }
 
@@ -29,7 +25,7 @@ process RUNAMPLIFY {
     input:
     path data_path
     path output_path
-    //path wait
+    path wait
 
     output:
     path "$output_path/*.tsv"  
@@ -44,7 +40,7 @@ process RUNCOLABFOLD{
     input:
     path data_path
     path output_path
-    //path wait
+    path wait
 
     output:
     path "$output_path"
@@ -104,13 +100,13 @@ process COMPILERESULTS{
 }
 
 workflow{
-    //wait=PREP()
+    wait=PREP()
     input_data_ch = Channel.fromPath("$params.data_path/*.fa")
     output_data_ch = Channel.fromPath("$params.output_path")
     zipper_ch = Channel.fromPath("$projectDir/zipper.py")
     rscript_path = Channel.fromPath("$projectDir/report.R")
-    output_amplify = RUNAMPLIFY(input_data_ch, output_data_ch)
-    output_colabfold = RUNCOLABFOLD(input_data_ch, output_data_ch)
+    output_amplify = RUNAMPLIFY(input_data_ch, output_data_ch, wait)
+    output_colabfold = RUNCOLABFOLD(input_data_ch, output_data_ch, wait)
     zip_ch = ZIPFOLDS(zipper_ch, output_colabfold)
     output_tamper = RUNTAMPER(input_data_ch, zip_ch)
     final_path = Channel.fromPath("$projectDir")

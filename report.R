@@ -65,7 +65,8 @@ pivoted <- model_probs %>%
 
 print(ggplot(pivoted, aes(x=name, y=value)) +
         geom_bar(stat="identity") +
-        scale_x_discrete(guide = guide_axis(angle = 90)) )
+        scale_x_discrete(guide = guide_axis(angle = 90)) +
+        geom_text(aes(label = value), vjust = 1.5, colour = "white") )
 
 cat('\n\n### Attention Distribution along the sequence:\n')
 attention <- amplify_row["Attention"]
