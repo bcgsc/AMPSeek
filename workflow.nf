@@ -81,6 +81,9 @@ process RUNTAMPER {
     script:
     """
     git clone https://github.com/bcgsc/tAMPer.git
+    cd tAMPer
+    git checkout 384889c5709044ff2c29cc253b613b9042f88f0b
+    cd ..
     python tAMPer/src/predict.py -seqs $input_data -pdbs $structure_data -hdim 64 -embedding_model t12 -d_max 12 -chkpnt tAMPer/checkpoints/trained/chkpnt.pt -result_csv $structure_data/tamper_result.csv
     """
 }
