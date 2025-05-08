@@ -34,7 +34,8 @@ This pipeline is comprised of 4 major and 2 minor steps:
 
 1. AMPlify: "quay.io/biocontainers/amplify:1.1.0--hdfd78af_0" docker image has been used. This contains AMPlify v1.1.0 and its dependencies.
 2. LocalColabFold:  "biohpc/localcolabfold:1.5" docker image has been used. This contains LocalColabFold v1.4.0 and its dependencies.
-3. tAMPer: The commit version "384889c5709044ff2c29cc253b613b9042f88f0b" and its listed dependencies have been used with conda according to tAMPer's .yml file. 
+3. tAMPer: tAMPer has been added as a subproject. Its listed dependencies have beeen used with conda according to tAMPer's yml file. 
+
 
 ### Pipeline Input
 This pipeline only takes one input file, a FASTA file. The FASTA file contains a peptide sequence. The pipeline only supports single FASTA files that contain one peptide sequence in them.
@@ -131,7 +132,7 @@ Example output can be found in the folder `AMPSeek/example_output` under the nam
 ![First Part](example_output/first.png)
 ![Second Part](example_output/second.png)
 
-This proves that the pipeline can identify AMP properties of the given peptide sequence. 
+This shows that the pipeline can identify AMP properties of the given peptide sequence. 
 
 
 ## References

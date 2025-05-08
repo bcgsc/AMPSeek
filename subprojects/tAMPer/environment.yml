@@ -113,3 +113,4 @@ dependencies:
   - zstd=1.5.5=hc292b87_0
   - pip:
       - fair-esm==2.0.0
+prefix: /projects/btl/hebrahimi/miniconda3/envs/tAMPer
