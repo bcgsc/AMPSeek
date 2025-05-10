@@ -1,10 +1,12 @@
  #! /usr/bin/env nextflow
+nextflow.enable.dsl = 2
+
 /*
  * definition of the process "data preperation" which downloads the data to be used 
  * from the input of the workflow based on the user's run command to start the pipeline
  */
 process PREP {
-    publishDir "output"
+    publishDir "$params.output_path"
 
     output:
     path ""    
@@ -17,12 +19,15 @@ process PREP {
         """
     else
         """
+        mkdir -p $params.output_path
+        echo $params.data_path
         """
 }
 
 process RUNAMPLIFY {
     errorStrategy 'retry', maxRetries: 1
     tag "Running AMPlify"
+    publishDir "$params.output_path"
 
     input:
     path data_path
@@ -30,7 +35,7 @@ process RUNAMPLIFY {
     path wait
 
     output:
-    path "$output_path/*.tsv"  
+    path "$output_path/*.tsv"
 
     script:
     """
@@ -41,6 +46,7 @@ process RUNAMPLIFY {
 process RUNCOLABFOLD{
     errorStrategy 'retry', maxRetries: 1
     tag "Running colabfold"
+    publishDir "$params.output_path"
 
     input:
     path data_path
@@ -52,35 +58,14 @@ process RUNCOLABFOLD{
 
     script:
     """
-    colabfold_batch $data_path $output_path/foldings --num-recycle 1
-    """
-}
-
-process ZIPFOLDS{
-    errorStrategy 'retry', maxRetries: 1
-    tag "Zipping foldings"
-
-    input:
-    path zipper
-    path output_path
-
-    output:
-    path "$output_path/foldings"
-
-    script:
-    """
-    file_path=\$(find  $output_path/foldings -maxdepth 1 -type f -name "*.a3m")
-    echo \$file_path
-    file_name=\$(basename \$file_path .a3m)
-    echo \$file_name
-    echo $output_path
-    python zipper.py \$file_name $output_path/foldings
+    colabfold_batch --amber --templates --zip --num-recycle 3 $data_path $output_path/foldings
     """
 }
 
 process RUNTAMPER {
     errorStrategy 'retry', maxRetries: 1
     tag "Running tAMPer"
+    publishDir "$params.output_path"
 
     input:
     path input_data
@@ -91,7 +76,7 @@ process RUNTAMPER {
 
     script:
     """
-    python subprojects/tAMPer/src/predict.py -seqs $input_data -pdbs $structure_data -hdim 64 -embedding_model t12 -d_max 12 -chkpnt tAMPer/checkpoints/trained/chkpnt.pt -result_csv $structure_data/tamper_result.csv
+    python subprojects/tAMPer/src/predict.py -seqs $input_data -pdbs $structure_data -hdim 64 -embedding_model t12 -d_max 12 -chkpnt subprojects/tAMPer/checkpoints/trained/chkpnt.pt -result_csv $structure_data/tamper_result.csv
     """
 }
 
@@ -113,16 +98,12 @@ workflow{
     wait=PREP()
     input_data_ch = Channel.fromPath("$params.data_path/*.{fa, fna, fasta}")
     output_data_ch = Channel.fromPath("$params.output_path")
-    zipper_ch = Channel.fromPath("$projectDir/zipper.py")
     rscript_path = Channel.fromPath("$projectDir/report.R")
-
+    final_path = Channel.fromPath("$projectDir")
+    
     output_amplify = RUNAMPLIFY(input_data_ch, output_data_ch, wait)
     output_colabfold = RUNCOLABFOLD(input_data_ch, output_data_ch, wait)
-
-    zip_ch = ZIPFOLDS(zipper_ch, output_colabfold)
-    output_tamper = RUNTAMPER(input_data_ch, zip_ch)
-    final_path = Channel.fromPath("$projectDir")
-
+    output_tamper = RUNTAMPER(input_data_ch, output_colabfold)
     COMPILERESULTS(output_amplify, output_colabfold, output_tamper, rscript_path, final_path)
 }
 
