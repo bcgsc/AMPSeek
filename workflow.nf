@@ -25,7 +25,6 @@ process PREP {
 }
 
 process RUNAMPLIFY {
-    errorStrategy 'retry', maxRetries: 1
     tag "Running AMPlify"
     publishDir "$params.output_path"
 
@@ -44,7 +43,6 @@ process RUNAMPLIFY {
 }
 
 process RUNCOLABFOLD{
-    errorStrategy 'retry', maxRetries: 1
     tag "Running colabfold"
     publishDir "$params.output_path"
 
@@ -63,7 +61,6 @@ process RUNCOLABFOLD{
 }
 
 process RUNTAMPER {
-    errorStrategy 'retry', maxRetries: 1
     tag "Running tAMPer"
     publishDir "$params.output_path"
 
