@@ -57,6 +57,7 @@ dependencies:
   - loguru=0.7.0=py310hff52083_0
   - lz4-c=1.9.4=h6a678d5_0
   - markupsafe=2.1.1=py310h7f8727e_0
+  - matplotlib
   - mkl=2021.4.0=h06a4308_640
   - mkl-service=2.4.0=py310h7f8727e_0
   - mkl_fft=1.3.1=py310hd6ae3a3_0
@@ -101,6 +102,7 @@ dependencies:
   - tbb=2021.8.0=hdb19cb5_0
   - threadpoolctl=2.2.0=pyh0d69192_0
   - tk=8.6.12=h1ccaba5_0
+  - transformers
   - tqdm=4.65.0=py310h2f386ee_0
   - typing_extensions=4.5.0=py310h06a4308_0
   - tzdata=2023c=h04d1e81_0

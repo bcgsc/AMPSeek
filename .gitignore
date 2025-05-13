@@ -2,4 +2,5 @@
 output
 .nextflow
 work
-
+.singularity
+.conda
