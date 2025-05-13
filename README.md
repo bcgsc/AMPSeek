@@ -16,7 +16,7 @@ AMPSeek proposes a pipeline to predict AMP activity, structure, and toxicity of 
 
 
 ## Pipeline
-This pipeline is built on pipeline manager Nextflow [[11](#references)] and requires `git`, `conda` and `Docker` to run. You can find the installations by clicking on the hyperlinks attached to the text: [Nextflow](https://www.nextflow.io/docs/latest/getstarted.html), [git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git), [conda](https://conda.io/projects/conda/en/latest/user-guide/install/index.htmlg), [Docker](https://docs.docker.com/engine/install/). If you are using Mac, after installing `Docker` please make sure to follow the steps mentioned [here](https://www.viget.com/articles/how-to-use-docker-on-os-x-the-missing-guide/). If you are using Docker desktop, please make sure `Docker Desktop` is started on your system. I suggest, if you are using Mac, to use Docker Desktop.
+This pipeline is built on pipeline manager Nextflow [[11](#references)] and requires `git`, `conda` and `Singularity` to run. You can find the installations by clicking on the hyperlinks attached to the text: [Nextflow](https://www.nextflow.io/docs/latest/getstarted.html), [git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git), [conda](https://conda.io/projects/conda/en/latest/user-guide/install/index.htmlg), [Singularity](https://docs.sylabs.io/guides/3.5/user-guide/quick_start.html).
 
 ### Pipeline Steps
 This pipeline is comprised of 4 major and 2 minor steps:
@@ -28,17 +28,17 @@ This pipeline is comprised of 4 major and 2 minor steps:
 5. RUNTAMPER: This step runs `tAMPer` on the input `.fa` and zipped structure files. It saves the toxicity report at the end of its prediction.
 6. COMPILERESULTS: This step compiles the results from steps 2, 3, and 5 into a `.html` file.  
 
-![Pipeline](example_output/pipeline.png)
+![Pipeline](imgs/pipeline.png)
 
 ### Main Images/Environments:
 
-1. AMPlify: "quay.io/biocontainers/amplify:1.1.0--hdfd78af_0" docker image has been used. This contains AMPlify v1.1.0 and its dependencies.
-2. LocalColabFold:  "biohpc/localcolabfold:1.5" docker image has been used. This contains LocalColabFold v1.4.0 and its dependencies.
+1. AMPlify: "quay.io/biocontainers/amplify:1.1.0--hdfd78af_0" container image has been used. This contains AMPlify v1.1.0 and its dependencies.
+2. LocalColabFold:  "biohpc/localcolabfold:1.5" container image has been used. This contains LocalColabFold v1.4.0 and its dependencies.
 3. tAMPer: tAMPer has been added as a subproject. Its listed dependencies have beeen used with conda according to tAMPer's yml file. 
 
 
 ### Pipeline Input
-This pipeline only takes one input file, a FASTA file. The FASTA file contains a peptide sequence. The pipeline only supports single FASTA files that contain one peptide sequence in them.
+This pipeline only takes one input file, a FASTA file. The FASTA file contains the peptide sequences that are wanted to be predicted in antimicrobial property and toxicity.
 
 The default input is the example input `AMPSeek/data/AMPlify_AMP_test_common.fa`, a modified version of test file `ÀMPlify/data/AMPlify_AMP_test_common.fa`. It contains a peptide sequence that is known to be an AMP. 
 
@@ -47,30 +47,25 @@ Users can download their file from the internet using the flags:
 nextflow workflow.nf --download_from <url> --download true
 ```
 
-One other option for users is to manually store the **FASTA** file that want to provide to the pipeline in the folder `AMPSeek/data`. **It is important for users to have only the file that they want to run in that folder, but nothing else. Also currently the pipeline only supports FASTA files that contain only 1 peptide sequence.**
+One other option for users is to manually store the **FASTA** file that want to provide to the pipeline in the folder `AMPSeek/data`. **It is important for users to have only the file that they want to run in that folder, but nothing else.**
 
 The pipeline can check different peptide sequences in different lengths and predict their activity, 3D structure, charge, and toxicity.
 
 ### Intermediate Result Files and Folders:
 As a result of prediction and zip stages, pipeline generates different intermediate files. The intermediate generated prediction files for activity, 3D structure, and toxicity are stored in `AMPSeek/output` folder. In this folder:
 
-1. `foldings` folder: This folder contains the output of peptide structure prediction. The pipeline only interact with the `.pbd` files which contain the molecular coordinate information directly. 
-2. `*.tsv` file: This is the report of the run for `ÀMPlify`. It contains the data pipeline uses this file for the final report's AMP activity data representation.
-3. `foldings/*.csv` file: This file contains the `tAMPer`'s report for the toxicity. The pipeline interacts with this file to generate the final report's AMP activity data representation.
+1. `foldings` folder: This folder contains the output of peptide structure prediction. 
+2. `*.tsv` file: This is the report of the run for `AMPlify`. It contains the data pipeline uses this file for the final report's AMP activity data representation.
+3. `foldings/*.csv` file: This file contains the `tAMPer`'s report for the toxicity. The pipeline interacts with this file to generate the final report's toxicity data representation.
+
+Second and third files get deleted after compiling the ultimate result which contains relevant information for the pipeline.
 
 ### Output File:
-The ultimate output file of the pipeline is the `report.html` file. This report can be found on the root directory after the run. The file contains these information:
+The ultimate output file of the pipeline is the `output/compiled_results.csv` file if there was no custom path for final output given. The file contains these information: 
+1. Peptides properties: ID, Sequence, Length, and Charge
+2. Antimicrobial activity predictions: AMPlify prediction and score
+3. Toxicity predictions: tAMPer prediction and score
 
-1. Information About the Run: Which file is run to generate this document
-2. General Information About the Run Peptide Sequence: ID, sequence, length, charge.
-3. AMP Activity Information About the Run Peptide Sequence: AMP activity and confidence score, sub model property scores for AMPlify plot (it uses ensamble learning), attention distribution along the sequence that led the AMPlify model to this outcome plot.  
-4. Protein Structure About the Run Peptide Sequence: Interactable 3D representation of the protein sequence
-5. Toxicity Information About the Run Peptide Sequence: Toxicity score and prediction.
-
-### Supplementary Files:
-
-1. zipper.py: This script takes the target name before extension and target directory, then zips the files generated by LocalColabFold.
-2. report.R: This script generates the report.html file as the ultimate output of the pipeline.
 
 ### Installation and Default Run
 First, clone this repository to your local:
@@ -83,22 +78,14 @@ Next, change your directory to the project directory:
 cd AMPSeek
 ```
 
-Next, if you are using Docker in Linux, make sure Docker daemon is running:
+Check if Singularity is installed properly:
 ```
-docker --version
+singularity --version
 ```
-If this does not give any output or an error, run the following:
+
+Check if NextFlow is installed properly:
 ```
-dockerd
-```
-If the previous not work, please try:
-```
-sudo dockerd
-```
-Next, you need to open 2 new folders in order to run:
-```
-mkdir output
-mkdir output/foldings
+nextflow -h
 ```
 
 Now, you are ready to run the pipeline (with default inputs):
@@ -110,29 +97,10 @@ or you can run pipeline with giving the `<url>` you want your data to download f
 nextflow workflow.nf --download true --download_from <url>
 ```
 
+You can also specify the output file name and location with `--output_file` and `--output_path` flags respectively.  
+
 **Note**: If you have your data, you can manually put the data into `AMPSeek/data` folder, but you need to delete the example input (`AMPSeek/data/AMPlify_AMP_test_common.fa`).
 
-### Rerun:
-
-Before reruns please do the following: 
-
-1. Make sure there is only 1 file (a FASTA file) in the directory `AMPSeek/data`.
-2. Make that FASTA file only contains 1 peptide sequence.
-3. Make sure `AMPSeek/output` only contains the folder `AMPSeek/output/foldings` and `AMPSeek/output/foldings` is empty. You can ensure this by deleting the `AMPSeek/output` folder. Please do not use `rm -rf`, due to the permission settings done by `LocalColabFold`. After deleting the `AMPSeek/output` folder you can run the following commands:
-
-```
-cd ~
-mkdir output
-mkdir output/foldings
-```
-
-## Result: 
-Example output can be found in the folder `AMPSeek/example_output` under the name `example_report.html`. As mentioned earlier, example input can be found in the folder `AMPSeek/data` under the name `AMPlify_AMP_test_common.fa`. This is an AMP so the results are no surprise. It should look like this:
-
-![First Part](example_output/first.png)
-![Second Part](example_output/second.png)
-
-This shows that the pipeline can identify AMP properties of the given peptide sequence. 
 
 
 ## References
