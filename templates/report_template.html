@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{{ title|default('AMPSeek Report', true) }}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    /* ——— base layout & buttons ——— */
+    body{
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+      background:#f9fafb;color:#111;margin:2rem;
+    }
+    header{display:flex;align-items:center;margin-bottom:1.5rem;}
+    header img{height:70px;margin-right:1rem;}
+    header h1{font-size:2rem;font-weight:600;}
+
+    /* ——— report-meta block ——— */
+    .report-meta{
+      line-height:1.5;
+      margin-bottom:1.5rem;
+      padding-bottom:1rem;
+      border-bottom:1px solid #d0d0d0;  /* divider */
+    }
+    .report-meta p{margin:0 0 .5rem 0;}
+
+    .overview-plot{margin-bottom:1.5rem;text-align:center;}
+    .overview-plot img{max-width:100%;height:auto;}
+
+    .table-actions{margin-bottom:1rem;text-align:right;}
+
+    .download-btn{
+      background:#d0d0d0;color:#fff;border:none;border-radius:8px;
+      padding:0.35rem 0.55rem;font-size:0.85rem;cursor:pointer;
+      transition:background .2s;
+    }
+    .download-btn:hover{background:#333;}
+
+    table{
+      width:100%;border-collapse:separate;border-spacing:0;
+      border-radius:12px;background:#fff;
+      box-shadow:0 2px 10px rgba(0,0,0,.06);overflow:hidden;
+    }
+    thead{background:#f1f3f5;}
+    th,td{padding:.8rem 1rem;font-size:.95rem;text-align:left;}
+    th{
+      font-weight:600;color:#495057;cursor:pointer;user-select:none;position:relative;
+    }
+    th.sort-asc::after,th.sort-desc::after{
+      content:'';position:absolute;right:.8rem;border:6px solid transparent;
+    }
+    th.sort-asc::after{border-bottom-color:#333;top:calc(50% - 4px);}
+    th.sort-desc::after{border-top-color:#333;top:calc(50% - 8px);}
+    td{border-top:1px solid #e9ecef;vertical-align:middle;word-break:break-word;}
+
+    .plot-buttons{
+      display:flex;flex-direction:row;align-items:center;gap:.4rem;
+    }
+    .plot-buttons button{
+      background:#aaa;color:#fff;border:none;border-radius:8px;
+      padding:.4rem .8rem;font-size:.85rem;white-space:nowrap;
+      cursor:pointer;transition:background .2s;
+    }
+    .plot-buttons button:hover{background:#333;}
+
+    .modal{
+      display:none;position:fixed;z-index:1000;top:0;left:0;width:100%;height:100%;
+      background:rgba(0,0,0,.5);
+    }
+    .modal-content{
+      position:relative;margin:5% auto;padding:1.5rem;background:#fff;
+      border-radius:12px;max-width:800px;
+      box-shadow:0 8px 24px rgba(0,0,0,.15);text-align:center;
+    }
+    .modal-content img{max-width:100%;height:auto;display:block;margin:0 auto 1rem;}
+
+    /* ——— save-dropdown (used in BOTH modals) ——— */
+    .save-dropdown{position:relative;display:inline-block;}
+    .save-btn{
+      background:transparent;color:#007aff;border:none;padding:.5rem;font-size:1.4rem;
+      cursor:pointer;transition:transform .15s;
+    }
+    .save-btn:hover{transform:scale(1.2);}
+    .save-dropdown .dropdown-content{
+      display:none;position:absolute;left:100%;top:0;margin-left:.3rem;
+      background:#fff;box-shadow:0 2px 10px rgba(0,0,0,.1);
+      border-radius:6px;overflow:hidden;z-index:1001;
+    }
+    .save-dropdown .dropdown-content button{
+      width:100%;padding:.5rem 1rem;border:none;background:#fff;text-align:left;
+      font-size:.9rem;cursor:pointer;transition:background .2s;
+    }
+    .save-dropdown .dropdown-content button:hover{background:#f1f3f5;}
+    .save-dropdown.open .dropdown-content,
+    .save-dropdown:hover .dropdown-content{display:block;}
+
+    .close-btn{
+      position:absolute;top:.5rem;right:1rem;font-size:1.5rem;font-weight:bold;
+      color:#666;cursor:pointer;z-index:20;
+    }
+    .close-btn:hover{color:#000;}
+
+    /* viewer canvas stretches to container */
+    #viewer canvas{width:100%!important;height:100%!important;}
+
+    /* responsivity */
+    @media(max-width:768px){
+      th,td{padding:.5rem;font-size:.85rem;}
+      .plot-buttons button,.save-btn,.download-btn{
+        padding:.3rem .6rem;font-size:.8rem;
+      }
+    }
+
+    /* ——— rounded viewer edges ——— */
+    #pdbModal .modal-content{border-radius:12px;overflow:hidden;}
+    #viewer{border-radius:12px;overflow:hidden;}
+    #viewer canvas{border-radius:12px!important;}
+
+    /* ——— tool-tip styling ——— */
+    .tt{position:relative;display:inline-block;}
+    .tooltiptext{
+      visibility:hidden;opacity:0;transition:opacity .15s;
+      width:max-content;max-width:250px;
+      background: rgba(128, 128, 128, 0.85);color:#fff;text-align:left;
+      padding:6px 8px;border-radius:6px;font-size:.8rem;
+      position:absolute;left:50%;transform:translateX(-50%);
+      top:calc(100% + 6px);z-index:100;
+    }
+    .tt:hover .tooltiptext{visibility:visible;opacity:1;}
+  </style>
+
+  <!-- 3Dmol.js -->
+  <script src="https://3dmol.org/build/3Dmol-min.js"></script>
+</head>
+<body>
+
+<header>
+  <img src="data:image/png;base64,{{ logo_data }}" alt="Logo">
+  <h1>{{ title|default('AMPSeek Report') }}</h1>
+</header>
+
+<!-- ─── report meta block ─── -->
+<div class="report-meta">
+  <p><strong>AMPSeek Report</strong></p>
+  <p><strong>Date:</strong> {{ report_date }}</p>
+</div>
+
+<!-- ─── overview donut charts ─── -->
+<div class="overview-plot">
+  <img src="data:image/svg+xml;base64,{{ overview_svg }}" alt="Sequence class breakdown">
+</div>
+
+<div class="table-actions">
+  <button id="downloadBtn" class="download-btn">💾 Save CSV</button>
+</div>
+
+<table id="dataTable" data-sort-dir="asc">
+  <thead>
+    <tr>
+      {% for col, idx, tip in [
+        ("Sequence ID",0,"Unique identifier"),
+        ("Sequence",1,"Amino-acid sequence"),
+        ("Length",2,"Number of residues in the sequence"),
+        ("Charge",3,"Net charge at pH 7"),
+        ("AMPlify Score",4,"Probability (0–1) predicted by AMPlify that the sequence is an antimicrobial peptide"),
+        ("tAMPer Score",5,"Probability (0–1) predicted by tAMPer that the sequence is toxic"),
+        ("AMPlify Prediction",6,"Binary class from AMPlify: AMP vs non-AMP"),
+        ("tAMPer Prediction",7,"Binary class from tAMPer: Toxic vs Non-toxic"),
+        ("Plots",8,"Buttons to view per-sequence scatter, attention heat-map, or 3-D structure")
+      ] %}
+      <th onclick="sortTable({{ idx }})">
+        <span class="tt">{{ col }}
+          <span class="tooltiptext">{{ tip|safe }}</span>
+        </span>
+      </th>
+      {% endfor %}
+    </tr>
+  </thead>
+  <tbody>
+    {% for r in records %}
+    <tr>
+      <td>{{ r.Sequence_ID }}</td>
+      <td>{{ r.Sequence }}</td>
+      <td>{{ r.Length }}</td>
+      <td>{{ r.Charge }}</td>
+      <td>{{ "%.3f"|format(r.AMPlify_Overall_Probability|float) }}</td>
+      <td>{{ "%.3f"|format(r.tAMPer_Toxicity_Probability|float) }}</td>
+      <td>{{ r.AMPlify_Prediction }}</td>
+      <td>{{ r.tAMPer_Prediction }}</td>
+      <td>
+        <div class="plot-buttons">
+          <button onclick="openModal(
+              'data:image/svg+xml;base64,{{ r.image_data.scatter_svg }}',
+              'data:image/png;base64,{{ r.image_data.scatter_png }}',
+              '{{ r.Sequence_ID }}_scatter.png')">Scatter</button>
+
+          {% if r.image_data.attention_svg %}
+          <button onclick="openModal(
+              'data:image/svg+xml;base64,{{ r.image_data.attention_svg }}',
+              'data:image/png;base64,{{ r.image_data.attention_png }}',
+              '{{ r.Sequence_ID }}_attention.png')">Attention</button>
+          {% endif %}
+
+          {% if r.pdb_b64 %}
+          <button onclick="openPdbModal('{{ r.pdb_b64 }}','{{ r.Sequence_ID }}')">
+            Structure
+          </button>
+          {% endif %}
+        </div>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<!-- (JavaScript block remains unchanged) -->
+<script>
+/* globals for plot-modal */
+let currentPng="",currentSvg="",currentFilename="";
+function openModal(svgUri,pngUri,filename){
+  document.getElementById("modalImg").src = svgUri;
+  currentSvg      = svgUri;
+  currentPng      = pngUri;
+  currentFilename = filename;
+  closeAllDropdowns();
+  document.getElementById("plotModal").style.display="block";
+}
+function toggleDropdown(){
+  document.querySelector('#plotModal .save-dropdown').classList.toggle('open');
+}
+function downloadCurrent(type){
+  let uri,fname;
+  if(type==='png'){uri=currentPng;fname=currentFilename;}
+  else{uri=currentSvg;fname=currentFilename.replace(/\.\w+$/,'.svg');}
+  const a=document.createElement('a');
+  a.href      = uri;
+  a.download  = fname;
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  closeAllDropdowns();
+}
+function closeModal(){document.getElementById("plotModal").style.display="none";}
+
+/* globals for PDB-modal */
+let currentPdbText="",currentPdbFilename="";
+function openPdbModal(b64,seqId){
+  const container=document.getElementById('viewer');
+  container.innerHTML="";
+  currentPdbText     = atob(b64);
+  currentPdbFilename = seqId + ".pdb";
+
+  const viewer=$3Dmol.createViewer(container,{backgroundColor:'#ffffff'});
+  viewer.addModel(currentPdbText,'pdb');
+  viewer.setStyle({},{cartoon:{color:'#00c04b'}});
+  viewer.zoomTo();viewer.render();
+
+  document.getElementById('pdbModalLabel').textContent=seqId;
+  closeAllDropdowns();
+  document.getElementById('pdbModal').style.display='block';
+}
+function togglePdbDropdown(){
+  document.querySelector('#pdbModal .save-dropdown').classList.toggle('open');
+}
+function downloadPdb(){
+  const blob=new Blob([currentPdbText],{type:'chemical/x-pdb'});
+  const link=document.createElement('a');
+  link.href=URL.createObjectURL(blob);link.download=currentPdbFilename;
+  document.body.appendChild(link);link.click();document.body.removeChild(link);
+  closeAllDropdowns();
+}
+function closePdbModal(){document.getElementById('pdbModal').style.display='none';}
+
+/* click-outside & dropdown cleanup */
+window.onclick=e=>{
+  const m1=document.getElementById("plotModal"),
+        m2=document.getElementById("pdbModal");
+  if(e.target===m1) closeModal();
+  if(e.target===m2) closePdbModal();
+  if(!e.target.closest('.save-dropdown')) closeAllDropdowns();
+};
+function closeAllDropdowns(){
+  document.querySelectorAll('.save-dropdown').forEach(dd=>dd.classList.remove('open'));
+}
+
+/* simple table-sort */
+function sortTable(colIndex){
+  const table=document.getElementById("dataTable");
+  let rows=Array.from(table.tBodies[0].rows);
+  const asc=table.getAttribute("data-sort-dir")!=="asc";
+  rows.sort((a,b)=>{
+    let aVal=a.cells[colIndex].textContent.trim(),
+        bVal=b.cells[colIndex].textContent.trim(),
+        aNum=parseFloat(aVal),bNum=parseFloat(bVal);
+    if(!isNaN(aNum)&&!isNaN(bNum)) return asc?aNum-bNum:bNum-aNum;
+    return asc?aVal.localeCompare(bVal):bVal.localeCompare(aVal);
+  });
+  rows.forEach(r=>table.tBodies[0].appendChild(r));
+  table.setAttribute("data-sort-dir",asc?"asc":"desc");
+  document.querySelectorAll("th").forEach(th=>th.classList.remove("sort-asc","sort-desc"));
+  document.querySelectorAll("th")[colIndex].classList.add(asc?"sort-asc":"sort-desc");
+}
+
+/* CSV export */
+document.getElementById('downloadBtn').addEventListener('click',()=>{
+  const table=document.getElementById('dataTable');
+  const headers=[...table.querySelectorAll('thead th')].slice(0,-1).map(th=>th.textContent.trim());
+  let csv=headers.join(',')+'\n';
+  [...table.tBodies[0].rows].forEach(tr=>{
+    const cells=[...tr.cells].slice(0,-1).map(td=>td.textContent.trim().replace(/"/g,'""'));
+    csv+=cells.join(',')+'\n';
+  });
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  const link=document.createElement('a');
+  link.href=URL.createObjectURL(blob);link.download='AMPSeek_report.csv';
+  document.body.appendChild(link);link.click();document.body.removeChild(link);
+});
+</script>
+
+<!-- ───── image modal ───── -->
+<div id="plotModal" class="modal">
+  <div class="modal-content">
+    <span class="close-btn" onclick="closeModal()">&times;</span>
+    <img id="modalImg" src="" alt="Plot">
+    <div class="save-dropdown">
+      <button class="save-btn" onclick="toggleDropdown()">💾</button>
+      <div class="dropdown-content">
+        <button onclick="downloadCurrent('png')">PNG</button>
+        <button onclick="downloadCurrent('svg')">SVG</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ───── PDB modal ───── -->
+<div id="pdbModal" class="modal">
+  <div class="modal-content" style="max-width:900px;">
+    <span class="close-btn" onclick="closePdbModal()">&times;</span>
+    <h3 id="pdbModalLabel" style="margin-top:0;"></h3>
+
+    <div id="viewer" style="width:100%;height:500px;"></div>
+
+    <div class="save-dropdown" style="margin-top:1rem;">
+      <button class="save-btn" onclick="togglePdbDropdown()">💾</button>
+      <div class="dropdown-content">
+        <button onclick="downloadPdb()">PDB</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

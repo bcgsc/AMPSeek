@@ -79,20 +79,23 @@ process COMPILERESULTS{
     input:
     path amplify
     path tamper
+    path colabfold
     path compiler_path
+    path imgs
+    path templates
 
     script:
     if(params.output_file!='')
         """
-        python $compiler_path $amplify $tamper $params.output_path/$params.output_file 
+        python $compiler_path $amplify $tamper $colabfold $params.output_path/$params.output_file $imgs $templates
         rm -f $params.output_path/AMPlify*.tsv
         rm -f $params.output_path/*.csv
         """
     else
         """
-        python $compiler_path $amplify $tamper $params.output_path/compiled_results.csv
+        python $compiler_path $amplify $tamper $colabfold $params.output_path/results.html $imgs $templates
         rm -f $params.output_path/AMPlify*.tsv
-        rm -f $params.output_path/results.csv
+        rm -f $params.output_path/*.csv
         """
 }
 
@@ -100,12 +103,14 @@ workflow{
     wait=PREP()
     input_data_ch = Channel.fromPath("$params.data_path/*.{fa, fna, fasta}")
     output_data_ch = Channel.fromPath("$params.output_path")
-    compiler_path = Channel.fromPath("$projectDir/compile_results.py")
+    compiler_path = Channel.fromPath("$projectDir/src/make_report.py")
+    template_path = Channel.fromPath("$projectDir/templates/report_template.html")
+    img_path = Channel.fromPath("$projectDir/imgs/Logo.png")
     
     output_amplify = RUNAMPLIFY(input_data_ch, output_data_ch, wait)
     output_colabfold = RUNCOLABFOLD(input_data_ch, output_data_ch, wait)
     output_tamper = RUNTAMPER(input_data_ch, output_colabfold, output_data_ch)
-    COMPILERESULTS(output_amplify, output_tamper, compiler_path)
+    COMPILERESULTS(output_amplify, output_tamper, output_colabfold, compiler_path, img_path, template_path)
 }
 
 workflow.onComplete {
