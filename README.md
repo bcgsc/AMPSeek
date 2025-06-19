@@ -26,16 +26,16 @@ This pipeline is comprised of 4 major and 2 minor steps:
 3. RUNCOLABFOLD: This step runs `LocalColabFold` on the input `.fa` file and saves the 3D structure prediction.
 4. ZIPFOLDS: This step zips the output of `LocalColabFold` to make it usable for `tAMPer`.
 5. RUNTAMPER: This step runs `tAMPer` on the input `.fa` and zipped structure files. It saves the toxicity report at the end of its prediction.
-6. COMPILERESULTS: This step compiles the results from steps 2, 3, and 5 into a `.html` file.  
+6. COMPILERESULTS: This step compiles the results from steps 2, 3, and 5 into an interactive `.html` file.  
 
 ![Pipeline](imgs/pipeline.png)
 
 ### Main Images/Environments:
 
 1. AMPlify: "quay.io/biocontainers/amplify:1.1.0--hdfd78af_0" container image has been used. This contains AMPlify v1.1.0 and its dependencies.
-2. LocalColabFold:  "biohpc/localcolabfold:1.5" container image has been used. This contains LocalColabFold v1.4.0 and its dependencies.
+2. LocalColabFold:  "biohpc/localcolabfold:1.5" container image has been used. This contains LocalColabFold v1.5.0 and its dependencies.
 3. tAMPer: tAMPer has been added as a subproject. Its listed dependencies have beeen used with conda according to tAMPer's yml file. 
-
+4. Visualization: "itsberkeucar/ampseek-visualization" container image has been used. This contains Jinja2, matplotlib, 
 
 ### Pipeline Input
 This pipeline only takes one input file, a FASTA file. The FASTA file contains the peptide sequences that are wanted to be predicted in antimicrobial property and toxicity.
@@ -44,7 +44,7 @@ The default input is the example input `AMPSeek/data/AMPlify_AMP_test_common.fa`
 
 Users can download their file from the internet using the flags:
 ```
-nextflow workflow.nf --download_from <url> --download true
+nextflow AMPSeek.nf --download_from <url> --download true
 ```
 
 One other option for users is to manually store the **FASTA** file that want to provide to the pipeline in the folder `AMPSeek/data`. **It is important for users to have only the file that they want to run in that folder, but nothing else.**
@@ -61,10 +61,15 @@ As a result of prediction and zip stages, pipeline generates different intermedi
 Second and third files get deleted after compiling the ultimate result which contains relevant information for the pipeline.
 
 ### Output File:
-The ultimate output file of the pipeline is the `output/compiled_results.csv` file if there was no custom path for final output given. The file contains these information: 
+The ultimate output file of the pipeline is the `output/results.html` file if there was no custom path for final output given. The file contains these information: 
 1. Peptides properties: ID, Sequence, Length, and Charge
 2. Antimicrobial activity predictions: AMPlify prediction and score
 3. Toxicity predictions: tAMPer prediction and score
+4. Summary statistics and plots: 
+    - Piecharts of Bioactivity and Toxicty Property Distribution of the total peptide batch.
+    - AMPlify vs. tAMPer score scatter plot for peptides.
+    - AMPlify attention distribution across amino acid residues.
+    - Interactive tertiary structure prediction plots.
 
 
 ### Installation and Default Run
@@ -90,11 +95,11 @@ nextflow -h
 
 Now, you are ready to run the pipeline (with default inputs):
 ```
-nextflow workflow.nf
+nextflow AMPSeek.nf
 ```
 or you can run pipeline with giving the `<url>` you want your data to download from. 
 ```
-nextflow workflow.nf --download true --download_from <url>
+nextflow AMPSeek.nf --download true --download_from <url>
 ```
 
 You can also specify the output file name and location with `--output_file` and `--output_path` flags respectively.  

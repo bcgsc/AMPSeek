@@ -8,6 +8,7 @@ import numpy as np
 import ast
 import seaborn as sns
 from matplotlib.ticker import FormatStrFormatter
+from matplotlib.lines import Line2D
 
 # ----------------------------------------------------------
 @dataclass
@@ -106,9 +107,9 @@ def plot_probability_scatter_individual(summary_df: pd.DataFrame,
         ax.set_xlim(-pad, 1 + pad)
         ax.set_ylim(-pad, 1 + pad)
 
-        ax.set_xlabel("AMPlify Overall Probability",
+        ax.set_xlabel("AMPlify Score",
                       fontsize=label_fontsize, fontweight="bold")
-        ax.set_ylabel("tAMPer Toxicity Probability",
+        ax.set_ylabel("tAMPer Score",
                       fontsize=label_fontsize, fontweight="bold")
         ax.set_title(sid,
                      fontsize=title_fontsize, fontweight="bold")
@@ -118,6 +119,16 @@ def plot_probability_scatter_individual(summary_df: pd.DataFrame,
 
         ax.plot([0, 1], [0, 1],
                 c="gray", ls="--", alpha=0.2)
+
+        handles, labs = plt.gca().get_legend_handles_labels()
+        point_of_interest = Line2D([0], [0], label=sid, marker='o', markersize=10, 
+                        markeredgecolor='r', markerfacecolor='r', linestyle='')
+        all_points = Line2D([0], [0], label="Other Peptides", marker='o', markersize=10, 
+                        markeredgecolor='black', markerfacecolor='black', linestyle='')
+
+        # add manual symbols to auto legend
+        handles.extend([point_of_interest, all_points])
+        ax.legend(handles=handles)
 
         # encode PNG
         buf_png = io.BytesIO()
@@ -180,7 +191,7 @@ def plot_attention_heatmap_single(sequence_id,
     cax = fig.add_axes([0.25, 0.02, 0.5, 0.06])
     cbar = fig.colorbar(im, cax=cax, orientation='horizontal')
 
-    cbar.set_label('Attention Score',
+    cbar.set_label('AMPlify Attention Score',
                    fontsize=legend_labelsize * scale)
     cbar.ax.tick_params(labelsize=legend_labelsize * scale,
                         pad=2 * scale)
@@ -209,9 +220,9 @@ def load_pdb_map(summary_df: pd.DataFrame,
     """
     out = {}
     for sid in summary_df["Sequence_ID"]:
-        folder = pdb_dir / f"{sid}.result"
-        if folder.exists():
-            pdb_files = list(folder.glob("*_relaxed_rank_001_*.pdb"))
+        if pdb_dir.exists():
+            print("Folder exists")
+            pdb_files = list(pdb_dir.glob(f"{sid}*_relaxed_rank_001_*.pdb"))
             if pdb_files:
                 pdb_b64 = base64.b64encode(pdb_files[0].read_bytes()) \
                                    .decode("ascii")
