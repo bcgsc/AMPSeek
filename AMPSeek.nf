@@ -1,18 +1,17 @@
  #! /usr/bin/env nextflow
 nextflow.enable.dsl = 2
 
-/*
- * definition of the process "data preperation" which downloads the data to be used 
- * from the input of the workflow based on the user's run command to start the pipeline
- */
 process PREP {
+    tag "Preparing for execution /  Downloading requested data"
     publishDir "$params.output_path"
+    cpus params.threads
+    time "${params.time ?: ''}"
 
     output:
     path ""    
 
     script:
-    if (params.download == true)
+    if (params.download_from)
         """
         rm $params.data_path/*.fa
         wget -O downloaded_input.fa -P $params.data_path $params.download_from
@@ -20,12 +19,13 @@ process PREP {
     else
         """
         mkdir -p $params.output_path
-        echo $params.data_path
         """
 }
 
 process RUNAMPLIFY {
     tag "Running AMPlify"
+    cpus params.threads
+    time "${params.time ?: ''}"
 
     input:
     path data_path
@@ -43,6 +43,8 @@ process RUNAMPLIFY {
 
 process RUNCOLABFOLD{
     tag "Running colabfold"
+    cpus params.threads
+    time "${params.time ?: ''}"
 
     input:
     path data_path
@@ -60,6 +62,8 @@ process RUNCOLABFOLD{
 
 process RUNTAMPER {
     tag "Running tAMPer"
+    cpus params.threads
+    time "${params.time ?: ''}"
 
     input:
     path input_data
@@ -76,6 +80,10 @@ process RUNTAMPER {
 }
 
 process COMPILERESULTS{
+    tag "Compiling results"
+    cpus params.threads
+    time "${params.time ?: ''}"
+
     input:
     path amplify
     path tamper
@@ -85,7 +93,7 @@ process COMPILERESULTS{
     path templates
 
     script:
-    if(params.output_file!='')
+    if(params.output_file)
         """
         python $compiler_path $amplify $tamper $colabfold $params.output_path/$params.output_file $imgs $templates
         rm -f $params.output_path/AMPlify*.tsv

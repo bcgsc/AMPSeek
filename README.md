@@ -24,9 +24,8 @@ This pipeline is comprised of 4 major and 2 minor steps:
 1. PREP: This step installs the given peptide sequence `.fa` file `--download_from <url>` from the internet if the `--download true` flag is used. If not, this step does nothing.
 2. RUNAMPLIFY: This step runs `AMPlify` on the input `.fasta` file and saves the result of AMP activity prediction.
 3. RUNCOLABFOLD: This step runs `LocalColabFold` on the input `.fa` file and saves the 3D structure prediction.
-4. ZIPFOLDS: This step zips the output of `LocalColabFold` to make it usable for `tAMPer`.
-5. RUNTAMPER: This step runs `tAMPer` on the input `.fa` and zipped structure files. It saves the toxicity report at the end of its prediction.
-6. COMPILERESULTS: This step compiles the results from steps 2, 3, and 5 into an interactive `.html` file.  
+4. RUNTAMPER: This step runs `tAMPer` on the input `.fa` and zipped structure files. It saves the toxicity report at the end of its prediction.
+5. COMPILERESULTS: This step compiles the results from steps 2, 3, and 5 into an interactive `.html` file.  
 
 ![Pipeline](imgs/pipeline.png)
 
