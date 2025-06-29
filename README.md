@@ -21,7 +21,7 @@ This pipeline is built on pipeline manager Nextflow [[11](#references)] and requ
 ### Pipeline Steps
 This pipeline is comprised of 4 major and 2 minor steps:
 
-1. PREP: This step installs the given peptide sequence `.fa` file `--download_from <url>` from the internet if the `--download true` flag is used. If not, this step does nothing.
+1. PREP: This step installs the given peptide sequence `.fa` file `--download_from <url>` from the internet.
 2. RUNAMPLIFY: This step runs `AMPlify` on the input `.fasta` file and saves the result of AMP activity prediction.
 3. RUNCOLABFOLD: This step runs `LocalColabFold` on the input `.fa` file and saves the 3D structure prediction.
 4. RUNTAMPER: This step runs `tAMPer` on the input `.fa` and zipped structure files. It saves the toxicity report at the end of its prediction.
@@ -33,8 +33,8 @@ This pipeline is comprised of 4 major and 2 minor steps:
 
 1. AMPlify: "quay.io/biocontainers/amplify:1.1.0--hdfd78af_0" container image has been used. This contains AMPlify v1.1.0 and its dependencies.
 2. LocalColabFold:  "biohpc/localcolabfold:1.5" container image has been used. This contains LocalColabFold v1.5.0 and its dependencies.
-3. tAMPer: tAMPer has been added as a subproject. Its listed dependencies have beeen used with conda according to tAMPer's yml file. 
-4. Visualization: "itsberkeucar/ampseek-visualization" container image has been used. This contains Jinja2, matplotlib, 
+3. tAMPer: "itsberkeucar/tamper:latest" container image has been used. This mainly contains tAMPer and its requirements.
+4. Visualization: "itsberkeucar/ampseek-visualization:latest" container image has been used. This mainly contains Jinja2, matplotlib, and pandas.
 
 ### Pipeline Input
 This pipeline only takes one input file, a FASTA file. The FASTA file contains the peptide sequences that are wanted to be predicted in antimicrobial property and toxicity.
