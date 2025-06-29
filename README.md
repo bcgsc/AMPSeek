@@ -39,11 +39,11 @@ This pipeline is comprised of 4 major and 2 minor steps:
 ### Pipeline Input
 This pipeline only takes one input file, a FASTA file. The FASTA file contains the peptide sequences that are wanted to be predicted in antimicrobial property and toxicity.
 
-The default input is the example input `AMPSeek/data/AMPlify_AMP_test_common.fa`, a modified version of test file `ÀMPlify/data/AMPlify_AMP_test_common.fa`. It contains a peptide sequence that is known to be an AMP. 
+The default input is the example input `AMPSeek/data/AMPSeek_data_10.fasta` which contains 10 peptides, a subsetted version of test file `ÀMPlify/data` files. We provide 3 more datasets of size 20, 100, and 200 in `AMPSeek/data/alternative_data` subfolder.
 
 Users can download their file from the internet using the flags:
 ```
-nextflow AMPSeek.nf --download_from <url> --download true
+nextflow AMPSeek.nf --download_from <url>
 ```
 
 One other option for users is to manually store the **FASTA** file that want to provide to the pipeline in the folder `AMPSeek/data`. **It is important for users to have only the file that they want to run in that folder, but nothing else.**
@@ -70,7 +70,6 @@ The ultimate output file of the pipeline is the `output/results.html` file if th
     - AMPlify attention distribution across amino acid residues.
     - Interactive tertiary structure prediction plots.
 
-
 ### Installation and Default Run
 First, clone this repository to your local:
 ```
@@ -82,9 +81,10 @@ Next, change your directory to the project directory:
 cd AMPSeek
 ```
 
-Check if Singularity is installed properly:
+Check if Singularity or Docker is installed properly:
 ```
 singularity --version
+docker --version
 ```
 
 Check if NextFlow is installed properly:
@@ -94,16 +94,19 @@ nextflow -h
 
 Now, you are ready to run the pipeline (with default inputs):
 ```
-nextflow AMPSeek.nf
+nextflow AMPSeek.nf -profile singularity
+nextflow AMPSeek.nf -profile docker
 ```
 or you can run pipeline with giving the `<url>` you want your data to download from. 
 ```
-nextflow AMPSeek.nf --download true --download_from <url>
+nextflow AMPSeek.nf -profile singularity --download_from <url> 
 ```
 
-You can also specify the output file name and location with `--output_file` and `--output_path` flags respectively.  
+The input directory that the pipeline checks can be changed with `--data_path` flag. You can also specify the output file name and location with `--output_file` and `--output_path` flags respectively. 
 
-**Note**: If you have your data, you can manually put the data into `AMPSeek/data` folder, but you need to delete the example input (`AMPSeek/data/AMPlify_AMP_test_common.fa`).
+Furthermore, the number of threads, timeout amount, and maximum memory can be specified with `--threads`, `--time`, and `--mem` flags, respectively.
+
+**Note**: If you have your data, you can manually put the data into `AMPSeek/data` folder, but you need to delete the example input (`AMPSeek/data/AMPSeek_data_10.fasta`).
 
 
 
