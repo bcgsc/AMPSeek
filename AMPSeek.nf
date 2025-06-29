@@ -56,7 +56,7 @@ process RUNCOLABFOLD{
 
     script:
     """
-    colabfold_batch --amber --templates --zip --num-recycle 3 $data_path $output_path/foldings
+    colabfold_batch --amber --zip $data_path $output_path/foldings
     """
 }
 
@@ -75,7 +75,8 @@ process RUNTAMPER {
 
     script:
     """
-    python ${projectDir}/subprojects/tAMPer/src/predict_tAMPer.py -seqs $input_data -pdbs $structure_data -hdim 64 -embedding_model t12 -d_max 12 -chkpnt ${projectDir}/subprojects/tAMPer/checkpoints/trained/chkpnt.pt -out $output_path
+    python /opt/tAMPer/src/predict_tAMPer.py -seqs $input_data -pdbs $structure_data -chkpnt /opt/tAMPer/checkpoints/trained/chkpnt.pt -out $output_path
+    find $structure_data -type f ! -name '*.zip' -delete
     """
 }
 
