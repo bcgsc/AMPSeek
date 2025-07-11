@@ -73,7 +73,7 @@ The ultimate output file of the pipeline is the `output/results.html` file if th
 ### Installation and Default Run
 First, clone this repository to your local:
 ```
-git clone https://github.com/berkeucar/AMPSeek.git
+git clone https://github.com/bcgsc/AMPSeek.git
 ```
 
 Next, change your directory to the project directory:
