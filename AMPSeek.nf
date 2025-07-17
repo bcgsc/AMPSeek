@@ -110,7 +110,9 @@ process COMPILERESULTS{
 
 workflow{
     wait=PREP()
-    input_data_ch = Channel.fromPath("$params.data_path/*.{fa, fna, fasta}")
+    input_data_ch = Channel.fromPath("$params.data_path/*.fa", checkIfExists: false)
+                    .mix(Channel.fromPath("$params.data_path/*.fna", checkIfExists: false))
+                    .mix(Channel.fromPath("$params.data_path/*.fasta", checkIfExists: false))
     output_data_ch = Channel.fromPath("$params.output_path")
     compiler_path = Channel.fromPath("$projectDir/src/make_report.py")
     template_path = Channel.fromPath("$projectDir/templates/report_template.html")
