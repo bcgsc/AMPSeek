@@ -168,7 +168,8 @@
         ("Plots",8,"Buttons to view per-sequence scatter, attention heat-map, or 3-D structure")
       ] %}
       <th onclick="sortTable({{ idx }})">
-        <span class="tt">{{ col }}
+        <span class="tt">
+          <span class="col-label">{{ col }}</span>
           <span class="tooltiptext">{{ tip|safe }}</span>
         </span>
       </th>
@@ -212,9 +213,8 @@
   </tbody>
 </table>
 
-<!-- (JavaScript block remains unchanged) -->
 <script>
-/* globals for plot-modal */
+/* ───── image modal (SVG/PNG) ───── */
 let currentPng="",currentSvg="",currentFilename="";
 function openModal(svgUri,pngUri,filename){
   document.getElementById("modalImg").src = svgUri;
@@ -239,7 +239,7 @@ function downloadCurrent(type){
 }
 function closeModal(){document.getElementById("plotModal").style.display="none";}
 
-/* globals for PDB-modal */
+/* ───── PDB modal ───── */
 let currentPdbText="",currentPdbFilename="";
 function openPdbModal(b64,seqId){
   const container=document.getElementById('viewer');
@@ -268,7 +268,7 @@ function downloadPdb(){
 }
 function closePdbModal(){document.getElementById('pdbModal').style.display='none';}
 
-/* click-outside & dropdown cleanup */
+/* ───── click-outside & dropdown ───── */
 window.onclick=e=>{
   const m1=document.getElementById("plotModal"),
         m2=document.getElementById("pdbModal");
@@ -280,7 +280,7 @@ function closeAllDropdowns(){
   document.querySelectorAll('.save-dropdown').forEach(dd=>dd.classList.remove('open'));
 }
 
-/* simple table-sort */
+/* ───── table-sort ───── */
 function sortTable(colIndex){
   const table=document.getElementById("dataTable");
   let rows=Array.from(table.tBodies[0].rows);
@@ -298,19 +298,32 @@ function sortTable(colIndex){
   document.querySelectorAll("th")[colIndex].classList.add(asc?"sort-asc":"sort-desc");
 }
 
-/* CSV export */
+/* ───── CSV export (reads only .col-label; quotes all cells) ───── */
 document.getElementById('downloadBtn').addEventListener('click',()=>{
   const table=document.getElementById('dataTable');
-  const headers=[...table.querySelectorAll('thead th')].slice(0,-1).map(th=>th.textContent.trim());
-  let csv=headers.join(',')+'\n';
+
+  // headers excluding the last "Plots" column
+  const headers = [...table.querySelectorAll('thead th')]
+    .slice(0, -1)
+    .map(th => th.querySelector('.col-label')?.textContent.trim() ?? '');
+
+  let csv = headers.map(h => `"${h.replace(/"/g,'""')}"`).join(',') + '\n';
+
+  // rows
   [...table.tBodies[0].rows].forEach(tr=>{
-    const cells=[...tr.cells].slice(0,-1).map(td=>td.textContent.trim().replace(/"/g,'""'));
-    csv+=cells.join(',')+'\n';
+    const cells = [...tr.cells].slice(0, -1).map(td =>
+      `"${td.textContent.trim().replace(/"/g,'""')}"`
+    );
+    csv += cells.join(',') + '\n';
   });
-  const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
-  const link=document.createElement('a');
-  link.href=URL.createObjectURL(blob);link.download='AMPSeek_report.csv';
-  document.body.appendChild(link);link.click();document.body.removeChild(link);
+
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = 'AMPSeek_report.csv';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
 });
 </script>
 
