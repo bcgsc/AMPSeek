@@ -13,12 +13,24 @@ process PREP {
     script:
     if (params.download_from)
         """
-        rm $params.data_path/*.fa
-        wget -O downloaded_input.fa -P $params.data_path $params.download_from
+        if [ -d "$params.data_path" ]; then
+            checksum=\$(find "$params.data_path" -type f -exec md5sum {} + | md5sum | cut -d ' ' -f1)
+            backup_dir="${params.data_path}_backup_\${checksum}"
+            if [ -d "\$backup_dir" ]; then
+                echo "Backup already exists (\$backup_dir), skipping new backup."
+            else
+                echo "Backing up existing data to: \$backup_dir"
+                mv "$params.data_path" "\$backup_dir"
+            fi
+        fi
+
+        # Recreate data directory and download new data
+        mkdir -p "$params.data_path"
+        wget -O "$params.data_path/downloaded_input.fa" "$params.download_from"
         """
     else
         """
-        mkdir -p $params.output_path
+        mkdir -p "$params.output_path"
         """
 }
 
