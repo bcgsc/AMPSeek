@@ -121,17 +121,16 @@ process COMPILERESULTS{
 }
 
 workflow{
-    wait=PREP()
-    input_data_ch = Channel.fromPath("$params.data_path/*.fa", checkIfExists: false)
-                    .mix(Channel.fromPath("$params.data_path/*.fna", checkIfExists: false))
-                    .mix(Channel.fromPath("$params.data_path/*.fasta", checkIfExists: false))
+    prep_out = PREP()
+
+    input_data_ch = prep_out.data_files
     output_data_ch = Channel.fromPath("$params.output_path")
     compiler_path = Channel.fromPath("$projectDir/src/make_report.py")
     template_path = Channel.fromPath("$projectDir/templates/report_template.html")
     img_path = Channel.fromPath("$projectDir/imgs/Logo.png")
     
-    output_amplify = RUNAMPLIFY(input_data_ch, output_data_ch, wait)
-    output_colabfold = RUNCOLABFOLD(input_data_ch, output_data_ch, wait)
+    output_amplify = RUNAMPLIFY(input_data_ch, output_data_ch, prep_out)
+    output_colabfold = RUNCOLABFOLD(input_data_ch, output_data_ch, prep_out)
     output_tamper = RUNTAMPER(input_data_ch, output_colabfold, output_data_ch)
     COMPILERESULTS(output_amplify, output_tamper, output_colabfold, compiler_path, img_path, template_path)
 }
