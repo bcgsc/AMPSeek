@@ -25,8 +25,6 @@ Antimicrobial activity, 3D structure, and toxicity prediction from peptide seque
 11. [License](#license)
 12. [Contact](#contact)
 
-
-
 ---
 
 ## Description of AMPSeek
@@ -102,7 +100,7 @@ nextflow AMPSeek.nf -profile docker
 
 * **Format:** single **FASTA** file of peptide sequences
 * **Default dataset:** `AMPSeek/data/AMPSeek_data_10.fasta` (10 peptides)
-* **Alternative sets:** `AMPSeek/data/alternative_data/` (20, 100, 200 peptides)
+* **Alternative sets:** `AMPSeek/data/alternative_data/` (20, 100 peptides)
 
 You may:
 
@@ -203,8 +201,20 @@ If you use AMPSeek, please cite:
 * **tAMPer** —  Ebrahimikondori *et al.* (2024) *Protein Science*. doi:10.1002/pro.5076 [(GitHub)](https://github.com/bcgsc/tAMPer)
 * **Nextflow** — Di Tommaso *et al.* (2017) *Nat Biotechnol* 35:316–319. doi:10.1038/nbt.3820 [(GitHub)](https://github.com/nextflow-io/nextflow?tab=readme-ov-file)
 
+
 ## License
-This repository aggregates multiple tools with their own licenses. Please see each tool’s license and the repository’s `LICENSE` file for details.
+AMPSeek Copyright (c) 2022 British Columbia Cancer Agency Branch. All rights reserved.
+
+AMPSeek is released under the GNU General Public License v3
+
+This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, version 3.
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with this program. If not, see http://www.gnu.org/licenses/.
+
+For commercial licensing options, please contact Patrick Rebstein (prebstein@bccancer.bc.ca).
+
 
 ## Contact
 
