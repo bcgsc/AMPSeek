@@ -13,12 +13,24 @@ process PREP {
     script:
     if (params.download_from)
         """
-        rm $params.data_path/*.fa
-        wget -O downloaded_input.fa -P $params.data_path $params.download_from
+        if [ -d "$params.data_path" ]; then
+            checksum=\$(find "$params.data_path" -type f -exec md5sum {} + | md5sum | cut -d ' ' -f1)
+            backup_dir="${params.data_path}_backup_\${checksum}"
+            if [ -d "\$backup_dir" ]; then
+                echo "Backup already exists (\$backup_dir), skipping new backup."
+            else
+                echo "Backing up existing data to: \$backup_dir"
+                mv "$params.data_path" "\$backup_dir"
+            fi
+        fi
+
+        # Recreate data directory and download new data
+        mkdir -p "$params.data_path"
+        wget -O "$params.data_path/downloaded_input.fa" "$params.download_from"
         """
     else
         """
-        mkdir -p $params.output_path
+        mkdir -p "$params.output_path"
         """
 }
 
@@ -109,17 +121,16 @@ process COMPILERESULTS{
 }
 
 workflow{
-    wait=PREP()
-    input_data_ch = Channel.fromPath("$params.data_path/*.fa", checkIfExists: false)
-                    .mix(Channel.fromPath("$params.data_path/*.fna", checkIfExists: false))
-                    .mix(Channel.fromPath("$params.data_path/*.fasta", checkIfExists: false))
+    prep_out = PREP()
+
+    input_data_ch = prep_out.data_files
     output_data_ch = Channel.fromPath("$params.output_path")
     compiler_path = Channel.fromPath("$projectDir/src/make_report.py")
     template_path = Channel.fromPath("$projectDir/templates/report_template.html")
     img_path = Channel.fromPath("$projectDir/imgs/Logo.png")
     
-    output_amplify = RUNAMPLIFY(input_data_ch, output_data_ch, wait)
-    output_colabfold = RUNCOLABFOLD(input_data_ch, output_data_ch, wait)
+    output_amplify = RUNAMPLIFY(input_data_ch, output_data_ch, prep_out)
+    output_colabfold = RUNCOLABFOLD(input_data_ch, output_data_ch, prep_out)
     output_tamper = RUNTAMPER(input_data_ch, output_colabfold, output_data_ch)
     COMPILERESULTS(output_amplify, output_tamper, output_colabfold, compiler_path, img_path, template_path)
 }
