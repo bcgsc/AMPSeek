@@ -1,7 +1,7 @@
  #! /usr/bin/env nextflow
 nextflow.enable.dsl = 2
 
-process PREP {
+process DOWNLOADSEQUENCES {
     tag "Preparing for execution /  Downloading requested data"
     publishDir "$params.output_path"
     cpus params.threads
@@ -121,7 +121,7 @@ process COMPILERESULTS{
 }
 
 workflow{
-    prep_out = PREP()
+    prep_out = DOWNLOADSEQUENCES()
 
     input_data_ch = prep_out.data_files
     output_data_ch = Channel.fromPath("$params.output_path")
